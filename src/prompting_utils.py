@@ -1,5 +1,6 @@
 import openai
 import os
+import time
 from typing import List
 from dotenv import load_dotenv
 
@@ -11,52 +12,38 @@ openai.api_key = api_key  # Configurar API key de OpenAI
 
 # FUNCIÓN PARA GENERAR RESPUESTA CON UN PROMPT
 
-def ejecutar_prompt(texto: str, prompt_plantilla: str, modelo: str = "gpt-3.5-turbo-instruct") -> str:
+client = openai.OpenAI(api_key=api_key)
+
+def aplicar_prompt(texto: str, prompt: str) -> str:
     """
-    Aplica un prompt a un texto usando un modelo de OpenAI.
-
-    Args:
-        texto (str): Texto de entrada para clasificar.
-        prompt_plantilla (str): Plantilla con {} para insertar el texto.
-        modelo (str): Modelo de OpenAI a usar.
-
-    Returns:
-        str: Respuesta generada por el modelo.
+    Aplica un prompt a un solo texto usando el modelo GPT-3.5-Turbo.
     """
     try:
-        prompt_formateado = prompt_plantilla.format(texto)
-
-        respuesta = openai.Completion.create(
-            engine=modelo,
-            prompt=prompt_formateado,
-            max_tokens=50,
-            temperature=0.5,
-            n=1
+        respuesta = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "Eres un asistente útil."},
+                {"role": "user", "content": prompt + "\n" + texto}
+            ],
+            temperature=0.7,
+            max_tokens=512
         )
-
-        texto_generado = respuesta['choices'][0]['text'].strip()
-        return texto_generado
+        return respuesta.choices[0].message.content.strip()
 
     except Exception as e:
-        print(f"[ERROR] Falló al ejecutar prompt: {e}")
+        print("[ERROR] Falló al ejecutar prompt:\n", e)
         return "ERROR"
 
 #FUNCIÓN PARA APLICAR UN PROMPT A UNA LISTA DE TEXTOS
 
-def aplicar_prompt_a_lista(textos: List[str], prompt_plantilla: str, modelo: str = "gpt-3.5-turbo-instruct") -> List[str]:
+def aplicar_prompt_a_lista(lista_textos: List[str], prompt: str) -> List[str]:
     """
-    Aplica un prompt a una lista de textos y devuelve las respuestas.
-
-    Args:
-        textos (List[str]): Lista de textos a procesar.
-        prompt_plantilla (str): Plantilla del prompt con {}.
-        modelo (str): Modelo de OpenAI.
-
-    Returns:
-        List[str]: Respuestas del modelo para cada texto.
+    Aplica el mismo prompt a una lista de textos, devolviendo una lista de respuestas.
     """
-    resultados = []
-    for texto in textos:
-        respuesta = ejecutar_prompt(texto, prompt_plantilla, modelo)
-        resultados.append(respuesta)
-    return resultados
+    respuestas = []
+    for i, texto in enumerate(lista_textos):
+        print(f"[{i+1}/{len(lista_textos)}] Procesando...")
+        respuesta = aplicar_prompt(texto, prompt)
+        respuestas.append(respuesta)
+        time.sleep(1.5)  # Para evitar límites de tasa
+    return respuestas

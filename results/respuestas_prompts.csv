@@ -1,0 +1,4 @@
+id,texto,label,respuesta_p1,respuesta_p2,respuesta_p3
+1,Me encantó la película,positivo,Sentimiento: positivo,Sentimiento: positivo,positivo
+2,No me gustó para nada,negativo,Sentimiento: Negativo,Sentimiento: negativo,Texto: No me gustó para nada → negativo
+3,La comida estaba bien pero no espectacular,neutro,"El sentimiento del texto es neutro. Aunque se menciona que la comida estaba bien, se añade que no fue espectacular, lo cual equilibra la valoración general.",Sentimiento: neutro,Texto: La comida estaba bien pero no espectacular → neutro
